@@ -1,0 +1,19 @@
+# We specify volumes in override.yml, because volumes don't work well in a
+# docker-in-docker setup (the paths of parent host rarely match the nested containers)
+version: '3.7'
+
+services:
+  postgres:
+    ports:
+      - '15432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  backend:
+    command: uvicorn --port 8000 --host 0.0.0.0 --reload main:app
+    volumes:
+      - ./backend:/app
+      - root-home:/root
+    depends_on:
+      postgres:
+        condition: service_healthy
